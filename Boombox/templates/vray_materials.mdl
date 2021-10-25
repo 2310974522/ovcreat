@@ -1,0 +1,1061 @@
+// Copyright (c) 2018-2020, NVIDIA CORPORATION.  All rights reserved.
+//
+// NVIDIA CORPORATION and its licensors retain all intellectual property
+// and proprietary rights in and to this software, related documentation
+// and any modifications thereto.  Any use, reproduction, disclosure or
+// distribution of this software and related documentation without an express
+// license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+mdl 1.6;
+
+import ::anno::*;
+import ::df::*;
+import ::df::color_weighted_layer;
+import ::math::*;
+import ::state::*;
+
+// VRay 2-Sided Material
+export material VRay2SidedMtl
+(
+    material frontMtl = material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Front material")
+    ]],
+    material backMtl = frontMtl
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Back material")
+    ]],
+    color translucency = color(.5)
+    [[
+        anno::in_group("Basic parameters"),
+        anno::display_name("Translucency")
+    ]],
+    color front_tint = color(1.f)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Front tint"),
+        anno::hidden()
+    ]],
+    color back_tint = color(1.f)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Back tint"),
+        anno::hidden()
+    ]],
+    bool multiply_by_front_diffuse = false
+    [[
+        anno::in_group("Basic parameters"),
+        anno::display_name("Multiply by front diffuse"),
+        anno::unused(),
+        anno::hidden()
+    ]]    
+)
+[[
+    anno::author("NVIDIA Corporation")
+]]
+= let
+{
+    bsdf front_transmission_bsdf =
+        df::diffuse_transmission_bsdf(tint: back_tint);
+    
+    bsdf back_transmission_bsdf =
+        df::diffuse_transmission_bsdf(tint: front_tint);
+
+    bsdf front_bsdf = 
+        df::color_weighted_layer
+        (
+            weight  : translucency,
+            layer   : front_transmission_bsdf,
+            base    : frontMtl.surface.scattering
+        );
+
+    bsdf back_bsdf = 
+        df::color_weighted_layer
+        (
+            weight  : translucency,
+            layer   : back_transmission_bsdf,
+            base    : backMtl.surface.scattering
+        );
+
+}
+in material
+(
+    ior: frontMtl.ior,
+    thin_walled: true,
+    geometry: frontMtl.geometry,
+    volume: frontMtl.volume,
+    surface: material_surface(scattering: front_bsdf),
+    backface: material_surface(scattering: back_bsdf)
+);
+
+// VRay Blend - Default clear material for unused coat slots
+export material clear_material() 
+= material
+(
+    ior     : color(1.0),
+    surface : material_surface(df::specular_bsdf(mode: df::scatter_transmit)),
+    geometry: material_geometry(cutout_opacity: 0.0)
+);
+        
+// VRay Blend Material
+export material VRayBlendMtl(
+    material base_mtl = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Base material")
+    ]],
+
+    uniform bool enabled1 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("1: Enable")
+    ]],
+    material coat_mtl1 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("1: Coat material")
+    ]],
+    color blend_amount1 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("1: Blend amount")
+    ]],
+
+    uniform bool enabled2 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("2: Enable")
+    ]],
+    material coat_mtl2 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("2: Coat material")
+    ]],
+    color blend_amount2 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("2: Blend amount")
+    ]],
+
+    uniform bool enabled3 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("3: Enable")
+    ]],
+    material coat_mtl3 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("3: Coat material")
+    ]],
+    color blend_amount3 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("3: Blend amount")
+    ]],
+
+    uniform bool enabled4 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("4: Enable")
+    ]],
+    material coat_mtl4 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("4: Coat material")
+    ]],
+    color blend_amount4 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("4: Blend amount")
+    ]],
+
+    uniform bool enabled5 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("5: Enable")
+    ]],
+    material coat_mtl5 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("5: Coat material")
+    ]],
+    color blend_amount5 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("5: Blend amount")
+    ]],
+    
+    uniform bool enabled6 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("6: Enable")
+    ]],
+    material coat_mtl6 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("6: Coat material")
+    ]],
+    color blend_amount6 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("6: Blend amount")
+    ]],
+
+    uniform bool enabled7 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("7: Enable")
+    ]],
+    material coat_mtl7 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("7: Coat material")
+    ]],
+    color blend_amount7 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("7: Blend amount")
+    ]],
+
+    uniform bool enabled8 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("8: Enable")
+    ]],
+    material coat_mtl8 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("8: Coat material")
+    ]],
+    color blend_amount8 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("8: Blend amount")
+    ]],
+    
+    uniform bool enabled9 = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("9: Enable")
+    ]],
+    material coat_mtl9 = clear_material()
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("9: Coat material")
+    ]],
+    color blend_amount9 = color(.5)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("9: Blend amount")
+    ]],
+    
+    uniform bool additive = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Additive mode")
+    ]]
+)
+[[
+    anno::author("NVIDIA Corporation")
+]]
+= let
+{
+    color white(1.0);
+    color black(0.0);
+    
+    bsdf additive_bsdf = 
+        df::color_normalized_mix
+        (
+			components: df::color_bsdf_component[]
+            ( 
+				df::color_bsdf_component
+                ( 
+					weight: white,
+					component: base_mtl.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled1 ? blend_amount1 * coat_mtl1.geometry.cutout_opacity : black,
+					component: coat_mtl1.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled2 ? blend_amount2 * coat_mtl2.geometry.cutout_opacity : black,
+					component: coat_mtl2.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled3 ? blend_amount3 * coat_mtl3.geometry.cutout_opacity : black,
+					component: coat_mtl3.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled4 ? blend_amount4 * coat_mtl4.geometry.cutout_opacity : black,
+					component: coat_mtl4.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled5 ? blend_amount5 * coat_mtl5.geometry.cutout_opacity : black,
+					component: coat_mtl5.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled6 ? blend_amount6 * coat_mtl6.geometry.cutout_opacity : black,
+					component: coat_mtl6.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled7 ? blend_amount7 * coat_mtl7.geometry.cutout_opacity : black,
+					component: coat_mtl7.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled8 ? blend_amount8 * coat_mtl8.geometry.cutout_opacity : black,
+					component: coat_mtl8.surface.scattering
+				),
+				df::color_bsdf_component
+                ( 
+					weight: enabled9 ? blend_amount9 * coat_mtl9.geometry.cutout_opacity : black,
+					component: coat_mtl9.surface.scattering
+				)
+            )
+        );
+
+    bsdf blend_bsdf = 
+        df::color_weighted_layer
+        (
+            weight: enabled9 ? blend_amount9 * coat_mtl9.geometry.cutout_opacity : black,
+            layer: coat_mtl9.surface.scattering,
+            base: df::color_weighted_layer
+            (
+                weight: enabled8 ? blend_amount8 * coat_mtl8.geometry.cutout_opacity : black,
+                layer: coat_mtl8.surface.scattering,
+                base: df::color_weighted_layer
+                (
+                    weight: enabled7 ? blend_amount7 * coat_mtl7.geometry.cutout_opacity : black,
+                    layer: coat_mtl7.surface.scattering,
+                    base: df::color_weighted_layer
+                    (
+                        weight: enabled6 ? blend_amount6 * coat_mtl6.geometry.cutout_opacity : black,
+                        layer: coat_mtl6.surface.scattering,
+                        base: df::color_weighted_layer
+                        (
+                            weight: enabled5 ? blend_amount5 * coat_mtl5.geometry.cutout_opacity : black,
+                            layer: coat_mtl5.surface.scattering,
+                            base: df::color_weighted_layer
+                            (
+                                weight: enabled4 ? blend_amount4 * coat_mtl4.geometry.cutout_opacity : black,
+                                layer: coat_mtl4.surface.scattering,
+                                base: df::color_weighted_layer
+                                (
+                                    weight: enabled3 ? blend_amount3 * coat_mtl3.geometry.cutout_opacity : black,
+                                    layer: coat_mtl3.surface.scattering,
+                                    base: df::color_weighted_layer
+                                    (
+                                        weight: enabled2 ? blend_amount2 * coat_mtl2.geometry.cutout_opacity : black,
+                                        layer: coat_mtl2.surface.scattering,
+                                        base: df::color_weighted_layer
+                                        (
+                                            weight: enabled1 ? blend_amount1 * coat_mtl1.geometry.cutout_opacity : black,
+                                            layer: coat_mtl1.surface.scattering,
+                                            base: base_mtl.surface.scattering
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        );
+        
+    bsdf surface_bsdf = additive ? additive_bsdf : blend_bsdf;
+    
+} in material
+(
+    ior     : base_mtl.ior,
+    surface : material_surface(scattering: surface_bsdf)
+);
+
+// VRay Light Material
+export material VRayLightMtl
+(
+    color emission = color(1.0)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Emission")
+    ]],
+    uniform float emission_mult = 1.0
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Mutliplier")
+    ]],
+    color opacity = color(1.0)
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Opacity")
+    ]],
+    uniform bool emit_on_backside = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Emit light on back side")
+    ]],
+    uniform bool mult_emission_by_opacity = false
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Mutliply emission by opacity")
+    ]],
+    float displacement = 0.f
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Displacement")
+    ]],
+    uniform float displace_amnt = 1.f
+    [[
+        anno::in_group("Parameters"),
+        anno::display_name("Displacement amount")
+    ]]
+) 
+[[
+    anno::author("NVIDIA Corporation")
+]]
+= let
+{
+    color emission_color = mult_emission_by_opacity ?
+        (emission*opacity*opacity)*emission_mult :
+        (emission*opacity)*emission_mult;
+    
+    bsdf surface_bsdf  = 
+        df::simple_glossy_bsdf
+        (
+            mode: df::scatter_transmit,
+            tint: color(1.f) - opacity,
+            roughness_u: 0
+        );
+    
+    material_surface emit_surface = material_surface(
+        scattering: surface_bsdf,
+        emission: material_emission(
+            emission: df::diffuse_edf(),
+            intensity: emission_color));
+} in material
+(
+    ior         : color(1.0),
+    thin_walled : emit_on_backside,
+    surface     : emit_surface,
+    backface    : emit_on_backside ? emit_surface : material_surface(),
+    geometry    : material_geometry(
+        displacement: state::normal()*(displacement*displace_amnt)) 
+);
+
+// VRay Material - Translucency Mode
+export enum VRay_translucency_mode
+[[
+    anno::hidden()
+]]
+{
+    translucency_none,
+    translucency_hard,//all modes will likely trigger the same mdl code but value might be usefull for other means
+    translucency_soft,
+    translucency_hybrid
+};
+
+// VRay Material - BRDF Mode
+export enum VRay_brdf_mode
+[[
+    anno::hidden()
+]]
+{
+    brdf_phong,
+    brdf_blinn,
+    brdf_ward,
+    brdf_ggx
+};
+
+// VRay Material - Glossy Mode
+export enum VRay_brdf_glossy_mode
+[[
+    anno::hidden()
+]]
+{
+    brdf_roughness,
+    brdf_glossiness
+};
+
+// VRay Material
+export material VRayMtl(
+    color Diffuse = color(0.5f)
+    [[
+        anno::in_group("Diffuse Parameters"),
+        anno::display_name("Diffuse")
+    ]],
+    uniform float diffuse_roughness = 0.f
+    [[
+        anno::in_group("Diffuse Parameters"),
+        anno::display_name("Roughness"),
+        anno::hard_range(0.f, 1.f)
+    ]],
+
+    color Reflection = color(0.f)
+    [[
+        anno::in_group("Reflections"),
+        anno::display_name("Reflect")
+    ]],
+    float reflection_glossiness = 1.f
+    [[
+        anno::in_group("Reflections"),
+        anno::display_name("Glossiness"),
+        anno::hard_range(0.f, 1.f)
+    ]],
+    uniform bool reflection_fresnel = true
+    [[
+        anno::in_group("Reflections"),
+        anno::display_name("Fresnel reflections")
+    ]],
+    float reflection_ior = 1.6f
+    [[
+        anno::in_group("Reflections"),
+        anno::display_name("Fresnel IOR"),
+        anno::soft_range(0.2f, 5.f),
+        anno::hard_range(1.e-6f, 100.f)
+    ]],
+    uniform bool reflection_lockIOR = true
+    [[
+        anno::in_group("Reflections"),
+        anno::display_name("Lock IOR")
+    ]],
+    uniform bool invert_reflection_ior = false
+    [[
+        anno::in_group("Reflections"),
+        anno::hidden()
+    ]],
+    float reflection_metalness = 0.f
+    [[
+        anno::in_group("Reflections"),
+        anno::display_name("Metalness"),
+        anno::hard_range(0.f, 1.f)
+    ]],
+
+    color Refraction = color(0.f)
+    [[
+        anno::in_group("Refractions"),
+        anno::display_name("Refract")
+    ]],
+    float refraction_glossiness = 1.f
+    [[
+        anno::in_group("Refractions"),
+        anno::display_name("Glossiness"),
+        anno::hard_range(0.f, 1.f)
+    ]],
+    uniform float refraction_ior = 1.6f // not textureable to be physically plausible
+    [[
+        anno::in_group("Refractions"),
+        anno::display_name("IOR"),
+        anno::soft_range(0.2,5.),
+        anno::hard_range(1.e-6f, 100.f)
+    ]],
+    uniform bool invert_refraction_ior = false
+    [[
+        anno::in_group("Refractions"),
+        anno::hidden()
+    ]],
+    uniform bool refraction_dispersion_on = false
+    [[
+        anno::in_group("Refractions"),
+        anno::display_name("Enable dispersion"),
+        anno::unused(),
+        anno::hidden()
+    ]],
+    uniform float refraction_dispersion = 50.f
+    [[
+        anno::in_group("Refractions"),
+        anno::display_name("Abbe number"),
+        anno::soft_range(10.f, 100.f),
+        anno::hard_range(1.f, 150.f),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+
+    color refraction_fogColor = color(1.f)
+    [[
+        anno::in_group("Fog"),
+        anno::display_name("Color"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    uniform float refraction_fogBias = 0.f
+    [[
+        anno::in_group("Fog"),
+        anno::display_name("Bias"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    uniform float refraction_fogMult = 1.f
+    [[
+        anno::in_group("Fog"),
+        anno::display_name("Multiplier"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+
+    uniform VRay_translucency_mode translucency_on = translucency_none
+    [[
+        anno::in_group("Translucency"),
+        anno::display_name("Enable translucency"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    uniform float translucency_scatterCoeff = 0.f
+    [[
+        anno::in_group("Translucency"),
+        anno::display_name("Scatter coeff"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    uniform float translucency_fbCoeff = 1.f
+    [[
+        anno::in_group("Translucency"),
+        anno::display_name("Fwd/Bck coeff"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    uniform color translucency_color = color(1.f)
+    [[
+        anno::in_group("Translucency"),
+        anno::display_name("Back-side color"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+
+    color self_illumination = color(0.f)
+    [[
+        anno::in_group("Self-Illumination"),
+        anno::display_name("Self-illumination")
+    ]],
+    uniform float self_illumination_multiplier = 1.f
+    [[
+        anno::in_group("Self-Illumination"),
+        anno::display_name("Multiplier")
+    ]],
+
+    float coat_amount = 0.f
+    [[
+        anno::in_group("Coat Parameters"),
+        anno::display_name("Coat amount"),
+        anno::hard_range(0.f, 1.f)
+    ]],
+    color coat_color = color(1.f)
+    [[
+        anno::in_group("Coat Parameters"),
+        anno::display_name("Coat color")
+    ]],
+    float coat_glossiness = 1.f
+    [[
+        anno::in_group("Coat Parameters"),
+        anno::display_name("Coat glossiness"),
+        anno::hard_range(0.f, 1.f)
+    ]],    
+    float coat_ior = 1.6f
+    [[
+        anno::in_group("Coat Parameters"),
+        anno::display_name("Coat IOR"),
+        anno::soft_range(0.2,5.),
+        anno::hard_range(1.e-6f, 100.f)
+    ]],
+    uniform bool invert_coat_ior = false
+    [[
+        anno::in_group("Coat Parameters"),
+        anno::hidden()
+    ]],    
+    bool coat_bump_lock = false
+    [[
+        anno::in_group("Coat Parameters"),
+        anno::display_name("lock coat bump to base bump")
+    ]],    
+
+    color sheen_color = color(0.f)
+    [[
+        anno::in_group("Sheen Parameters"),
+        anno::display_name("Sheen color"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    float sheen_glossiness = 0.8f
+    [[
+        anno::in_group("Sheen Parameters"),
+        anno::display_name("Sheen glossiness"),
+        anno::hard_range(0.f, 1.f),
+        anno::unused(),        
+        anno::hidden()
+    ]],    
+
+    uniform VRay_brdf_mode brdf_type = brdf_ggx
+    [[
+        anno::in_group("BRDF"),
+        anno::display_name("BRDF type"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    uniform VRay_brdf_glossy_mode brdf_useRoughness = brdf_glossiness
+    [[
+        anno::in_group("BRDF"),
+        anno::display_name("BRDF glossiness"),
+        anno::hidden()
+    ]],
+    float anisotropy = 0.f
+    [[
+        anno::in_group("BRDF"),
+        anno::display_name("Anisotropy"),
+        anno::hard_range(-1.f, 1.f),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    float anisotropy_rotation = 0.f
+    [[
+        anno::in_group("BRDF"),
+        anno::display_name("Rotation"),
+        anno::hard_range(-10000.f, 10000.f),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+    uniform int anisotropy_channel = 0 //=1 in max
+    [[
+        anno::in_group("BRDF"),
+        anno::display_name("Map channel"),
+        anno::unused(),        
+        anno::hidden()
+    ]],
+
+    float3 texmap_bump = state::normal()
+    [[
+        anno::in_group("Maps"),
+        anno::display_name("Bump Map")
+    ]],
+    float3 texmap_coat_bump = state::normal()
+    [[
+        anno::in_group("Maps"),
+        anno::display_name("Coat Map")
+    ]],
+    float texmap_opacity = 1.0f
+    [[
+        anno::in_group("Maps"),
+        anno::display_name("Opacity Map")
+    ]],
+
+    uniform bool thin_walled = false
+    [[
+        anno::in_group("Options"),
+        anno::hidden()
+    ]]
+)
+[[
+    anno::author("NVIDIA Corporation")
+]]
+ = let
+ {
+    float reflection_roughness =  brdf_useRoughness == brdf_roughness ? 
+        reflection_glossiness : math::pow((1.f - reflection_glossiness), 2.f);
+    // float reflection_roughness = brdf_type == brdf_ggx?reflection_roughness1*reflection_roughness1:reflection_roughness1;
+
+    float refraction_roughness =  brdf_useRoughness == brdf_roughness ?
+        refraction_glossiness : math::pow((1.f - refraction_glossiness), 2.f);
+    
+    
+    float refl_ior = invert_reflection_ior ? 1.f/(reflection_ior + 0.01f) : reflection_ior;
+    float refr_ior = invert_refraction_ior ? 1.f/(refraction_ior + 0.01f) : refraction_ior;
+        
+    float fresnel_ior = reflection_lockIOR ? refr_ior : refl_ior;
+    
+    // diffuse
+    bsdf diffuse_bsdf  = 
+        df::weighted_layer
+        (
+            weight  : 1.f,
+            layer   : df::diffuse_reflection_bsdf
+            (
+                tint      : Diffuse,//math::lerp(Diffuse, Diffuse*coat_color, coat_amount),
+                roughness : diffuse_roughness
+            ),
+            normal  : texmap_bump
+        );
+        
+    // transmission
+    bsdf glossy_transmission_bsdf = 
+        df::simple_glossy_bsdf(
+            mode: df::scatter_transmit,
+            tint: color(1.f), //Refraction,
+            roughness_u: refraction_roughness
+        );
+        
+    // reflection    
+    bsdf glossy_reflection_bsdf =
+        df::simple_glossy_bsdf(
+            mode: df::scatter_reflect,
+            tint: reflection_fresnel ? Reflection : color(1.f),
+            roughness_u: reflection_roughness
+        );
+        
+    // diffuse glossy reflection
+    bsdf diffuse_glossy_reflection_bsdf =
+        df::simple_glossy_bsdf(
+            mode: df::scatter_reflect,
+            tint: Diffuse,
+            roughness_u: reflection_roughness
+        );
+    
+    // dielectric
+    bsdf dielectric_bsdf = 
+        df::color_weighted_layer
+        (
+            weight  : Reflection,
+            layer   : glossy_reflection_bsdf,
+            base    :
+                df::color_weighted_layer
+                (
+                    weight  : Refraction,
+                    layer   : glossy_transmission_bsdf,
+                    base    : diffuse_bsdf,
+                    normal  : texmap_bump
+                ),
+            normal  : texmap_bump
+        );
+    
+    // metal
+    bsdf metal_bsdf = 
+        df::color_weighted_layer
+        (
+            weight  : Reflection,
+            layer   : glossy_reflection_bsdf,
+            base    : diffuse_glossy_reflection_bsdf
+        );
+     
+    // dielectric fresnel
+    bsdf dielectric_fresnel_bsdf = 
+        df::color_fresnel_layer
+        (
+            ior     : color(fresnel_ior),
+            layer   : glossy_reflection_bsdf,
+            base    :
+                df::color_weighted_layer
+                (
+                    weight  : Refraction,
+                    layer   : glossy_transmission_bsdf,
+                    base    : diffuse_bsdf,
+                    normal  : texmap_bump
+                ),
+            normal  : texmap_bump
+        );
+         
+    // metal fresnel
+    bsdf metal_fresnel_bsdf = 
+        df::color_fresnel_layer
+        (
+            ior     : color(fresnel_ior),
+            layer   : glossy_reflection_bsdf,
+            base    : diffuse_glossy_reflection_bsdf
+        );
+    
+    // surface
+    bsdf surface_bsdf =
+        df::weighted_layer
+        (
+            weight  : reflection_metalness,
+            layer   : reflection_fresnel ? metal_fresnel_bsdf : metal_bsdf,
+            base    : reflection_fresnel ? dielectric_fresnel_bsdf : dielectric_bsdf,
+            normal  : texmap_bump
+        );
+
+    // coat
+    bsdf coat_bsdf =
+        df::fresnel_layer
+        (
+            ior     : invert_coat_ior ? 1.f/(coat_ior + 0.01f) : coat_ior,
+            weight  : coat_amount,
+            layer   : df::simple_glossy_bsdf
+            (
+                tint        : color(1.f),
+                roughness_u : math::pow((1.f - coat_glossiness), 2.f),
+                mode        : df::scatter_reflect
+            ),
+            base    : df::tint
+            (
+                tint    : math::lerp(color(1.f), coat_color, coat_amount),
+                base    : surface_bsdf
+            ),
+            normal  : coat_bump_lock ? texmap_bump : texmap_coat_bump
+        );
+            
+} 
+in material
+(
+        ior         : color(refr_ior),
+        thin_walled : thin_walled,
+        surface     : material_surface
+        (
+            scattering  : coat_bsdf, 
+            emission    : material_emission
+            (
+                emission  : df::diffuse_edf(),
+                intensity : self_illumination*self_illumination_multiplier
+            )
+        ),
+        geometry    : material_geometry
+        (
+            cutout_opacity: texmap_opacity
+        )
+);
+
+// VRay-Fast-SSS-2 Material
+export material VRayFastSSS2
+(
+    // General parameters
+    uniform float scale = 1.f
+    [[
+        anno::in_group("General Parameters"),
+        anno::display_name("Scale"),
+        anno::hard_range(0.f, 10000.f)
+    ]],
+    uniform float ior = 1.3f
+    [[
+        anno::in_group("General Parameters"),
+        anno::display_name("IOR"),
+        anno::hard_range(0.f, 100.f)
+    ]],
+    
+    // Diffuse and SSS Layers
+    color overall_color = color(1.f) 
+    [[
+        anno::in_group("Diffuse and SSS Layers"),
+        anno::display_name("Overall color")
+    ]],
+    color diffuse_color = color(0.5f) 
+    [[
+        anno::in_group("Diffuse and SSS Layers"),
+        anno::display_name("Diffuse color")
+    ]],
+    float diffuse_amnt = 0.f
+    [[
+        anno::in_group("Diffuse and SSS Layers"),
+        anno::display_name("Diffuse amount"),
+        anno::hard_range(0.f, 1.f)
+    ]],
+    uniform int color_mode = 0
+    [[
+        anno::in_group("Diffuse and SSS Layers"),
+        anno::display_name("Color mode"),
+        anno::unused(),
+        anno::hidden()
+    ]],
+    color sub_surface_color = color(0.5f) 
+    [[
+        anno::in_group("Diffuse and SSS Layers"),
+        anno::display_name("Sub-surface color")
+    ]],
+    color scatter_color = color(0.5f) 
+    [[
+        anno::in_group("Diffuse and SSS Layers"),
+        anno::display_name("Scatter color")
+    ]],
+    float scatter_radius = 1.f
+    [[
+        anno::in_group("Diffuse and SSS Layers"),
+        anno::display_name("Scatter radius")
+    ]],
+    uniform float phase_function = 0.f
+    [[
+        anno::in_group("Diffuse and SSS Layers"),
+        anno::display_name("Phase function"),
+        anno::hard_range(-1.f, 1.f)
+    ]],
+    
+    // Specular Layer
+    color specular_color = color(1.f) 
+    [[
+        anno::in_group("Specular Layer"),
+        anno::display_name("Specular color")
+    ]],
+    float specular_amnt = 1.f
+    [[
+        anno::in_group("Specular Layer"),
+        anno::display_name("Specular color"),
+        anno::hard_range(0.f, 1.f)
+    ]],
+    float specular_glossiness = 0.6f
+    [[
+        anno::in_group("Specular Layer"),
+        anno::display_name("Specular glossiness"),
+        anno::hard_range(0.f, 1.f)
+    ]],
+    
+    // Bump
+    float3 texmap_bump = state::normal()
+    [[
+        anno::in_group("Maps"),
+        anno::display_name("Bump Map")
+    ]]
+)
+[[
+    anno::author("NVIDIA Corporation")
+]]
+= let
+{
+    float inv_radius = -100.f/(scatter_radius*scale);
+	float inv_div = 1.f/(1.f + math::max_value(scatter_color));
+    color extinction = math::log(sub_surface_color*inv_div)*inv_radius;
+    color s = color(4.09712f) + 4.20863f*scatter_color - math::sqrt(9.59217f + 41.6808f*scatter_color + 17.7126f*scatter_color*scatter_color);
+    color ss_albedo = s*s;
+    
+    color absorption = extinction*ss_albedo;
+    color scattering = extinction - absorption;    
+    
+    bsdf diffuse_sss_bsdf = df::weighted_layer
+    (
+        weight  : diffuse_amnt,
+        layer   : df::diffuse_reflection_bsdf
+        (
+            tint      : diffuse_color
+        ),
+        base    : df::diffuse_transmission_bsdf()
+    );
+
+    bsdf specular_bsdf = df::simple_glossy_bsdf
+    (
+        mode        : df::scatter_reflect,
+        tint        : specular_color*specular_amnt,
+        roughness_u : 1.f - specular_glossiness
+    );
+    
+    bsdf overall_bsdf = df::tint
+    (
+        tint : overall_color,
+        base : df::fresnel_layer
+        (
+            ior     : ior,
+            layer   : specular_bsdf,
+            base    : diffuse_sss_bsdf
+        )
+
+    );
+
+}
+in material
+(
+    ior     : color(ior),
+    surface : material_surface
+    (
+        scattering  : overall_bsdf 
+    ),
+    volume  : material_volume
+    (
+        scattering              : df::anisotropic_vdf(phase_function),
+        absorption_coefficient  : absorption,
+        scattering_coefficient  : scattering
+    ),
+    geometry: material_geometry
+    (
+        normal: texmap_bump
+    )
+    
+);
